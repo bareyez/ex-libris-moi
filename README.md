@@ -64,11 +64,19 @@ The following are the screens that the user will encounter while working in the 
 - Lending
 - Profile
 
-### Flow Navigation
+### Flow Navigation with Interactive Wireframes
 
 - Login/sign up screen => Home
+
+<img src="/design_gifs/logintohome.gif" width=300 height=auto />
+
 - Home => Add new book/media
+
+<img src="/design_gifs/hometoaddbook.gif" width=300 height=auto />
+
 - Discover titles => View wishlist
 - (For future version) Community feed (Find friends) => Create post
 - Lending/manage loans => Add new loan
 - Profile => Login/sign up screen (if user logs out)
+
+<img src="/design_gifs/otherfeatures.gif" width=300 height=auto />
