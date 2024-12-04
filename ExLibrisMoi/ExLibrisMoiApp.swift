@@ -1,17 +1,15 @@
-//
-//  ExLibrisMoiApp.swift
-//  ExLibrisMoi
-//
-//  Created by Bryan Reyes on 11/27/24.
-//
-
 import SwiftUI
+import FirebaseCore
 
 @main
 struct ExLibrisMoiApp: App {
+    init() {
+        FirebaseApp.configure()
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AuthenticationView()
         }
     }
-}
+} 
