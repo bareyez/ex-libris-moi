@@ -13,19 +13,30 @@ struct LoginView: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("Log in")
-                .font(.custom("Garamond", size: 32))
+                .font(.custom("Georgia", size: 32))
+            
+            if !errorMessage.isEmpty {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .font(.custom("Georgia", size: 14))
+                    .multilineTextAlignment(.center)
+            }
             
             TextField("Email or Username", text: $identifier)
                 .textFieldStyle(.roundedBorder)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled(true)
+                .font(.custom("Georgia", size: 16))
+                .controlSize(.large)
             
             SecureField("Password", text: $password)
                 .textFieldStyle(.roundedBorder)
-            
+                .font(.custom("Georgia", size: 16))
+                .controlSize(.large)
             Button("Log in") {
                 login()
             }
+            .font(.custom("Georgia", size: 16))
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color(.systemGray))
@@ -39,11 +50,6 @@ struct LoginView: View {
             .font(.footnote)
         }
         .padding()
-        .alert("Error", isPresented: $showError) {
-            Button("OK") { }
-        } message: {
-            Text(errorMessage)
-        }
         .navigationBarBackButtonHidden(false)
     }
     
@@ -99,8 +105,10 @@ struct LoginView: View {
             DispatchQueue.main.async {
                 isLoading = false
                 if let error = error {
-                    errorMessage = error.localizedDescription
+                    errorMessage = "Invalid credentials. Try again!"
                     showError = true
+                } else {
+                    dismiss()
                 }
             }
         }

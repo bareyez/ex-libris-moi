@@ -10,6 +10,7 @@
 		3695E3342CF80C370008911B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3695E3332CF80C370008911B /* FirebaseAuth */; };
 		3695E3362CF80C3B0008911B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3695E3352CF80C3B0008911B /* FirebaseFirestore */; };
 		3695E3542CFBA6800008911B /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3695E3532CFBA6800008911B /* FirebaseStorage */; };
+		36AF4E1C2CFFF7310042DD85 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 36AF4E1B2CFFF7310042DD85 /* CodeScanner */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36AF4E1C2CFFF7310042DD85 /* CodeScanner in Frameworks */,
 				3695E3342CF80C370008911B /* FirebaseAuth in Frameworks */,
 				3695E3362CF80C3B0008911B /* FirebaseFirestore in Frameworks */,
 				3695E3542CFBA6800008911B /* FirebaseStorage in Frameworks */,
@@ -98,6 +100,7 @@
 				3695E3332CF80C370008911B /* FirebaseAuth */,
 				3695E3352CF80C3B0008911B /* FirebaseFirestore */,
 				3695E3532CFBA6800008911B /* FirebaseStorage */,
+				36AF4E1B2CFFF7310042DD85 /* CodeScanner */,
 			);
 			productName = ExLibrisMoi;
 			productReference = 3695E2ED2CF808F50008911B /* ExLibrisMoi.app */;
@@ -129,6 +132,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3695E3012CF80BE60008911B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				36AF4E1A2CFFF7310042DD85 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3695E2EE2CF808F50008911B /* Products */;
@@ -387,6 +391,14 @@
 				minimumVersion = 11.5.0;
 			};
 		};
+		36AF4E1A2CFFF7310042DD85 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -404,6 +416,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3695E3012CF80BE60008911B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		36AF4E1B2CFFF7310042DD85 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 36AF4E1A2CFFF7310042DD85 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

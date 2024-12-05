@@ -1,60 +1,96 @@
 import SwiftUI
 import FirebaseAuth
-import FirebaseFirestore
 
 struct HomeView: View {
-    @State private var firstName = ""
+    @StateObject private var viewModel = HomeViewModel()
+    @State private var searchText = ""
+    @State private var selectedGenre: String?
+    @State private var selectedAuthor: String?
+    @State private var selectedYear: String?
+    @State private var selectedFormat: String?
+    @State private var showingScanner = false
+    
+    // Grid layout configuration
+    private let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+    
+    var filteredBooks: [Book] {
+        if searchText.isEmpty {
+            return viewModel.books
+        }
+        return viewModel.books.filter { book in
+            book.title.localizedCaseInsensitiveContains(searchText) ||
+            book.author.localizedCaseInsensitiveContains(searchText)
+        }
+    }
     
     var body: some View {
         NavigationView {
-            VStack(alignment: .leading) {
-                HStack {
-                    Text("Hello, \(firstName)!")
-                        .font(.custom("Georgia", size: 32))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                    
-                    Spacer()
-                    
-                    Button(action: {}) {
-                        Image(systemName: "plus")
-                            .font(.title2)
+            VStack(spacing: 16) {
+                // Search bar
+                SearchBar(text: $searchText)
+                
+                // Filters
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        FilterButton(title: "Genre", selection: $selectedGenre)
+                        FilterButton(title: "Author", selection: $selectedAuthor)
+                        FilterButton(title: "Year", selection: $selectedYear)
+                        FilterButton(title: "Format", selection: $selectedFormat)
+                    }
+                    .padding(.horizontal)
+                }
+                
+                if viewModel.books.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Books Yet", systemImage: "book.closed")
+                    } description: {
+                        Text("Add your first book to get started")
+                    } actions: {
+                        Button("Scan a Book") {
+                            showingScanner = true
+                        }
+                    }
+                } else {
+                    // Book grid
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(filteredBooks) { book in
+                                NavigationLink(destination: BookDetailView(book: book)) {
+                                    BookCoverView(book: book)
+                                        .frame(height: 180)
+                                }
+                            }
+                        }
+                        .padding()
+                    }
+                    .refreshable {
+                        // Refresh the books when pulled
+                        await viewModel.refreshBooks()
                     }
                 }
-                .padding()
-                
-                Text("Your library")
-                    .font(.custom("Georgia", size: 24))
-                    .padding(.horizontal)
-                
-                Spacer()
-                
-                Button(action: {}) {
-                    Label("Add your first book!", systemImage: "plus")
-                        .font(.custom("Georgia", size: 18))
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .padding()
-                
-                Spacer()
             }
+            .navigationTitle("Your library")
+            .toolbar {
+                Button(action: { showingScanner = true }) {
+                    Image(systemName: "plus")
+                }
+            }
+            .onTapGesture {
+                dismissKeyboard()
+            }
+        }
+        .sheet(isPresented: $showingScanner) {
+            BookScannerView()
         }
         .onAppear {
-            fetchUserData()
+            viewModel.fetchBooks()
         }
     }
-    
-    private func fetchUserData() {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        
-        Firestore.firestore().collection("users").document(userId).getDocument { document, error in
-            if let document = document, document.exists {
-                firstName = document.data()?["firstName"] as? String ?? ""
-            }
+    func dismissKeyboard() {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
-    }
-} 
+}

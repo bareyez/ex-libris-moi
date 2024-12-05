@@ -20,9 +20,13 @@ struct SignUpView: View {
             
             TextField("Your first name", text: $firstName)
                 .textFieldStyle(.roundedBorder)
+                .font(.custom("Georgia", size: 16))
+                .controlSize(.large)
             
             TextField("Your last name", text: $lastName)
                 .textFieldStyle(.roundedBorder)
+                .font(.custom("Georgia", size: 16))
+                .controlSize(.large)
             
             TextField("Choose a username", text: $username)
                 .textFieldStyle(.roundedBorder)
@@ -30,6 +34,8 @@ struct SignUpView: View {
                 .onChange(of: username) { newValue in
                     checkUsernameAvailability()
                 }
+                .font(.custom("Georgia", size: 16))
+                .controlSize(.large)
             
             if isCheckingUsername {
                 ProgressView()
@@ -38,13 +44,18 @@ struct SignUpView: View {
             TextField("Your email address", text: $email)
                 .textFieldStyle(.roundedBorder)
                 .textInputAutocapitalization(.never)
+                .font(.custom("Georgia", size: 16))
+                .controlSize(.large)
             
             SecureField("Create a password", text: $password)
                 .textFieldStyle(.roundedBorder)
+                .font(.custom("Georgia", size: 16))
+                .controlSize(.large)
             
             Text("Password must be at least 8 characters.")
                 .font(.caption)
                 .foregroundColor(.gray)
+                .font(.custom("Georgia", size: 12))
             
             Button("Create account") {
                 signUp()
@@ -85,36 +96,51 @@ struct SignUpView: View {
     }
     
     private func signUp() {
-        Auth.auth().createUser(withEmail: email, password: password) { result, error in
-            if let error = error {
-                errorMessage = error.localizedDescription
-                showError = true
-                return
-            }
-            
-            if let user = result?.user {
-                let userData = [
-                    "firstName": firstName,
-                    "lastName": lastName,
-                    "email": email,
-                    "username": username,
-                    "memberSince": Date().timeIntervalSince1970
-                ]
+        // First check if username exists
+        Firestore.firestore().collection("usernames")
+            .document(username.lowercased())
+            .getDocument { document, error in
+                if let document = document, document.exists {
+                    errorMessage = "This username is already taken. Please choose another one."
+                    showError = true
+                    return
+                }
                 
-                // Save username to separate collection for uniqueness check
-                Firestore.firestore().collection("usernames")
-                    .document(username.lowercased())
-                    .setData(["uid": user.uid])
-                
-                Firestore.firestore().collection("users")
-                    .document(user.uid)
-                    .setData(userData) { error in
-                        if let error = error {
-                            errorMessage = error.localizedDescription
-                            showError = true
-                        }
+                // If username is available, proceed with account creation
+                Auth.auth().createUser(withEmail: email, password: password) { result, error in
+                    if let error = error {
+                        errorMessage = error.localizedDescription
+                        showError = true
+                        return
                     }
+                    
+                    if let user = result?.user {
+                        let userData = [
+                            "firstName": firstName,
+                            "lastName": lastName,
+                            "email": email,
+                            "username": username,
+                            "memberSince": Date().timeIntervalSince1970
+                        ]
+                        
+                        // Save username to separate collection for uniqueness check
+                        Firestore.firestore().collection("usernames")
+                            .document(username.lowercased())
+                            .setData(["uid": user.uid])
+                        
+                        Firestore.firestore().collection("users")
+                            .document(user.uid)
+                            .setData(userData) { error in
+                                if let error = error {
+                                    errorMessage = error.localizedDescription
+                                    showError = true
+                                } else {
+                                    // Dismiss the view when account creation and data saving is successful
+                                    dismiss()
+                                }
+                            }
+                    }
+                }
             }
-        }
     }
 } 
