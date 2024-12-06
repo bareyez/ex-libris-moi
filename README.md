@@ -1,8 +1,26 @@
-# Product Spec Design: *Ex Libris Moi* 📚
+# ex libris moi 📚: your personal library
 
 ### 📲 App Description
 
 Ex Libris Moi is a personal library management system that helps users catalog their books and media, track lending activities, and explore new titles. The app provides an elegant and minimalist user interface for organizing collections and interacting with friends or the community.
+
+## ↘️ Progress Updates
+
+This section highlights the progress made in developing the app. Features are marked as complete or in progress.
+
+- 12/05/2024:
+	- Added ability for users to scan ISBN/UPC barcodes to add media.
+	- Tab-based navigation between Home, Discover, Lending, and Profile screens implemented.
+
+<img src="/design_gifs/dec5update.gif" width=300 height=auto />	
+
+- 11/30/2024:
+	- Created and integrated user authentication system.
+	- Designed wireframes for Home and Lending screens.
+- 11/20/2024:
+	- Completed initial project setup (repo creation, boilerplate code).
+
+# Product Spec Design
 
 ## 🧾 User Stories
 
