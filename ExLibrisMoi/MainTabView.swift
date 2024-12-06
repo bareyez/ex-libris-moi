@@ -13,7 +13,7 @@ struct MainTabView: View {
                     Label("Discover", systemImage: "magnifyingglass")
                 }
             
-            Text("Community")
+            CommunityView()
                 .tabItem {
                     Label("Community", systemImage: "person.3")
                 }

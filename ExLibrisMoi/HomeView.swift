@@ -31,7 +31,7 @@ struct HomeView: View {
         NavigationView {
             VStack(spacing: 16) {
                 // Search bar
-                SearchBar(text: $searchText)
+                SearchBar(text: $searchText, placeholder: "Search for a book in your library...")
                 
                 // Filters
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -44,7 +44,12 @@ struct HomeView: View {
                     .padding(.horizontal)
                 }
                 
-                if viewModel.books.isEmpty {
+                if viewModel.isLoading {
+                    Spacer()
+                    ProgressView("Loading your library...")
+                        .padding()
+                    Spacer()
+                } else if viewModel.books.isEmpty {
                     ContentUnavailableView {
                         Label("No Books Yet", systemImage: "book.closed")
                     } description: {
@@ -68,7 +73,6 @@ struct HomeView: View {
                         .padding()
                     }
                     .refreshable {
-                        // Refresh the books when pulled
                         await viewModel.refreshBooks()
                     }
                 }
@@ -87,6 +91,9 @@ struct HomeView: View {
             BookScannerView()
         }
         .onAppear {
+            viewModel.fetchBooks()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .libraryDidChange)) { _ in
             viewModel.fetchBooks()
         }
     }

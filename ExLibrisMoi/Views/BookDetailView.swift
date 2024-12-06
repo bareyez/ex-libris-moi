@@ -1,13 +1,23 @@
 import SwiftUI
 
 struct BookDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var viewModel = BookDetailViewModel()
     let book: Book
-    @State private var userRating: Int = 0
-    @State private var lendingStatus: Book.LendingStatus = .available
+    @State private var userRating: Int
+    @State private var lendingStatus: Book.LendingStatus
+    @State private var showingDeleteAlert = false
+    
+    // Initialize state with book values
+    init(book: Book) {
+        self.book = book
+        _userRating = State(initialValue: book.userRating)
+        _lendingStatus = State(initialValue: book.lendingStatus)
+    }
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .center, spacing: 0) {
                 // Book cover and title header
                 BookHeaderView(book: book)
                 
@@ -37,9 +47,10 @@ struct BookDetailView: View {
                                 .cornerRadius(8)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .center)
                     
                     // Rating
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .center, spacing: 8) {
                         Text("Your rating")
                             .font(.headline)
                         
@@ -49,6 +60,9 @@ struct BookDetailView: View {
                                     .foregroundColor(.yellow)
                                     .onTapGesture {
                                         userRating = index
+                                        Task {
+                                            await viewModel.updateBookRating(book, rating: index)
+                                        }
                                     }
                             }
                         }
@@ -83,13 +97,60 @@ struct BookDetailView: View {
                     if let language = book.language {
                         DetailRow(title: "Language", value: language)
                     }
+                    if let genres = book.genre {
+                        DetailRow(title: "Genre(s)", value: genres.joined(separator: ", "))
+                    }
                     DetailRow(title: "ISBN", value: book.isbn)
                     DetailRow(title: "Date Added", value: formatDate(book.dateAdded))
                 }
                 .padding()
+                
+                // Add this at the bottom after the "More details" section
+                VStack(spacing: 16) {
+                    Divider()
+                    
+                    Button(role: .destructive, action: {
+                        showingDeleteAlert = true
+                    }) {
+                        HStack {
+                            Image(systemName: "trash")
+                            Text("Remove from Library")
+                        }
+                        .foregroundColor(.red)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.red, lineWidth: 1)
+                        )
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.vertical)
             }
         }
+        .navigationTitle("Book Details")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Remove Book", isPresented: $showingDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                Task {
+                    await viewModel.deleteBook(book)
+                    dismiss()
+                }
+            }
+        } message: {
+            Text("Are you sure you want to remove '\(book.title)' from your library? This action cannot be undone.")
+        }
+        .overlay {
+            if viewModel.isLoading {
+                ProgressView()
+                    .padding()
+                    .background(Color(.systemBackground))
+                    .cornerRadius(8)
+                    .shadow(radius: 2)
+            }
+        }
     }
     
     private var statusColor: Color {

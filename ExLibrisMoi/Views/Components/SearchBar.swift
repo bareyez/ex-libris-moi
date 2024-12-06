@@ -2,13 +2,14 @@ import SwiftUI
 
 struct SearchBar: View {
     @Binding var text: String
+    let placeholder: String
     
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.gray)
             
-            TextField("Search for a book in your library...", text: $text)
+            TextField(placeholder, text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
             
             if !text.isEmpty {

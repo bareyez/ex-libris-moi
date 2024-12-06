@@ -15,7 +15,7 @@ class BookScannerViewModel: ObservableObject {
     
     private let db = Firestore.firestore()
     private let storage = Storage.storage()
-    private let openLibraryAPI = OpenLibraryAPI()
+    private let googleBooksAPI = GoogleBooksAPI()
     
     func lookupBook(isbn: String) {
         isLoading = true
@@ -23,13 +23,14 @@ class BookScannerViewModel: ObservableObject {
         
         Task {
             do {
-                let book = try await openLibraryAPI.fetchBook(isbn: isbn)
-                print("Debug: Book details - ISBN: \(book.isbn ?? "nil"), Title: \(book.title), Cover URL: \(book.coverURL ?? "nil")")
+                let book = try await googleBooksAPI.fetchBook(isbn: isbn)
+                print("Debug: Book details - ISBN: \(book.isbn), Title: \(book.title)")
+                print("Debug: Cover URL before storage: \(book.coverURL ?? "nil")")
                 await MainActor.run {
                     scannedBooks.append(book)
                     isLoading = false
                 }
-            } catch OpenLibraryAPI.APIError.noBookFound {
+            } catch GoogleBooksAPI.APIError.noBookFound {
                 await MainActor.run {
                     errorMessage = "No book found with this ISBN"
                     isLoading = false
@@ -62,17 +63,20 @@ class BookScannerViewModel: ObservableObject {
                         .document()
                     
                     var coverURL = book.coverURL
-                    let openLibraryCoverURL = "https://covers.openlibrary.org/b/isbn/\(book.isbn)-L.jpg"
-                    
-                    do {
-                        coverURL = try await downloadAndStoreBookCover(
-                            url: URL(string: openLibraryCoverURL)!,
-                            userId: userId,
-                            isbn: book.isbn
-                        )
-                    } catch {
-                        print("Debug: Failed to store cover for \(book.title) - \(error.localizedDescription)")
-                        coverURL = openLibraryCoverURL
+                    if let originalCoverURL = book.coverURL,
+                       let url = URL(string: originalCoverURL) {
+                        do {
+                            // Store the Google Books cover image
+                            coverURL = try await downloadAndStoreBookCover(
+                                url: url,
+                                userId: userId,
+                                isbn: book.isbn
+                            )
+                        } catch {
+                            print("Debug: Failed to store cover for \(book.title) - \(error.localizedDescription)")
+                            // Keep the original Google Books URL if storage fails
+                            coverURL = originalCoverURL
+                        }
                     }
                     
                     let bookData = Book(
@@ -99,6 +103,7 @@ class BookScannerViewModel: ObservableObject {
                 await MainActor.run {
                     scannedBooks.removeAll()
                     isLoading = false
+                    NotificationCenter.default.post(name: .libraryDidChange, object: nil)
                 }
             } catch {
                 print("Debug: Error saving books - \(error.localizedDescription)")
@@ -112,13 +117,17 @@ class BookScannerViewModel: ObservableObject {
     
     private func downloadAndStoreBookCover(url: URL, userId: String, isbn: String) async throws -> String {
         do {
+            print("Debug: Attempting to download cover from URL: \(url.absoluteString)")
             let (data, response) = try await URLSession.shared.data(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse,
                   httpResponse.statusCode == 200,
                   !data.isEmpty else {
+                print("Debug: Invalid response or empty data")
                 throw APIError.invalidResponse
             }
+            
+            print("Debug: Successfully downloaded cover image, size: \(data.count) bytes")
             
             let storageRef = storage.reference()
                 .child("users")

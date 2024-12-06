@@ -11,13 +11,23 @@ struct BookCoverView: View {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .aspectRatio(2/3, contentMode: .fit)
+                        .onAppear {
+                            print("Debug: Loading image from URL: \(coverURLString)")
+                        }
                 case .success(let image):
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .clipped()
-                case .failure:
+                        .onAppear {
+                            print("Debug: Successfully loaded image from URL: \(coverURLString)")
+                        }
+                case .failure(let error):
                     placeholderImage
+                        .onAppear {
+                            print("Debug: Failed to load image from URL: \(coverURLString)")
+                            print("Debug: Error: \(error.localizedDescription)")
+                        }
                 @unknown default:
                     placeholderImage
                 }
@@ -28,6 +38,9 @@ struct BookCoverView: View {
             .shadow(radius: 2)
         } else {
             placeholderImage
+                .onAppear {
+                    print("Debug: No cover URL available for book: \(book.title)")
+                }
         }
     }
     

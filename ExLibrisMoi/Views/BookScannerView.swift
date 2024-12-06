@@ -12,7 +12,6 @@ struct BookScannerView: View {
             HStack {
                 Spacer()
                 Text("Add a book to your library!")
-                    .font(.custom("Georgia", size: 24))
                 Spacer()
             }
             .padding()

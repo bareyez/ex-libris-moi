@@ -16,58 +16,55 @@ struct ProfileView: View {
     @State private var errorMessage = ""
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Profile")
-                .font(.custom("Georgia", size: 32))
-                .padding(.top)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-            
-            Button(action: {
-                showActionSheet = true
-            }) {
-                if let image = profileImage {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 120, height: 120)
-                        .clipShape(Circle())
-                } else {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 120, height: 120)
-                        .overlay(
-                            Image(systemName: "person.fill")
-                                .foregroundColor(.gray)
-                                .font(.system(size: 50))
-                        )
+        NavigationView {
+            VStack(spacing: 20) {
+                Button(action: {
+                    showActionSheet = true
+                }) {
+                    if let image = profileImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 120, height: 120)
+                            .clipShape(Circle())
+                    } else {
+                        Circle()
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 120, height: 120)
+                            .overlay(
+                                Image(systemName: "person.fill")
+                                    .foregroundColor(.gray)
+                                    .font(.system(size: 50))
+                            )
+                    }
                 }
-            }
-            
-            VStack(spacing: 5) {
-                Text(firstName)
-                    .font(.custom("Georgia", size: 24))
                 
-                Text("@\(username)")
-                    .foregroundColor(.gray)
-                
-                Text("member since \(memberSince.formatted(.dateTime.year()))")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
+                VStack(spacing: 5) {
+                    Text(firstName)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                    
+                    Text("@\(username)")
+                        .foregroundColor(.gray)
+                    
+                    Text("member since \(memberSince.formatted(.dateTime.year()))")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
 
-            Spacer()
-            
-            Button(action: signOut) {
-                Text("log out")
-                    .font(.custom("Georgia", size: 18))
-                    .frame(width: 100)
-                    .padding()
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(25)
+                Spacer()
+                
+                Button(action: signOut) {
+                    Text("log out")
+                        .frame(width: 100)
+                        .padding()
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
+                }
+                .padding(.bottom)
             }
-            .padding(.bottom)
+            .navigationTitle("Profile")
         }
         .onAppear(perform: loadUserData)
         .sheet(isPresented: $showImagePicker) {
