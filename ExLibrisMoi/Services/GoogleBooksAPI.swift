@@ -1,8 +1,8 @@
 import Foundation
 
 class GoogleBooksAPI {
-    private let apiKey = Configuration.GoogleBooksAPI.apiKey
-    
+    //private let apiKey = Configuration.GoogleBooksAPI.apiKey
+    private let apiKey = Configuration.GOOGLE_BOOKS_API_KEY
     enum APIError: Error {
         case invalidURL
         case noBookFound
@@ -25,11 +25,12 @@ class GoogleBooksAPI {
                 throw APIError.noBookFound
             }
             
-            let coverURL = volumeInfo.imageLinks?.getBestQualityURL()
+            // Use Open Library cover URL instead of Google Books
+            let coverURL = "https://covers.openlibrary.org/b/isbn/\(isbn)-L.jpg"
             
             print("Debug: Book details fetched - Title: \(volumeInfo.title)")
             print("Debug: Authors: \(volumeInfo.authors?.joined(separator: ", ") ?? "Unknown")")
-            print("Debug: Cover URL: \(coverURL ?? "nil")")
+            print("Debug: Cover URL: \(coverURL)")
             
             return Book(
                 isbn: isbn,
@@ -73,36 +74,5 @@ struct VolumeInfo: Codable {
     let publishedDate: String?
     let description: String?
     let categories: [String]?
-    let imageLinks: ImageLinks?
     let language: String?
-    
-    struct ImageLinks: Codable {
-        let smallThumbnail: String?
-        let thumbnail: String?
-        let small: String?
-        let medium: String?
-        let large: String?
-        let extraLarge: String?
-        
-        func getBestQualityURL() -> String? {
-            // Get the thumbnail URL first
-            guard let baseURL = thumbnail else {
-                return smallThumbnail
-            }
-            
-            // Transform the URL to get the highest quality version
-            var highQualityURL = baseURL
-                .replacingOccurrences(of: "http:", with: "https:")
-            
-            // Add zoom parameter for higher quality if not present
-            if !highQualityURL.contains("zoom=") {
-                highQualityURL += "&zoom=1"
-            }
-            
-            print("Debug: Original thumbnail URL: \(baseURL)")
-            print("Debug: Transformed high quality URL: \(highQualityURL)")
-            
-            return highQualityURL
-        }
-    }
 } 

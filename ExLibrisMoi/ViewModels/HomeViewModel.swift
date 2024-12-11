@@ -30,7 +30,6 @@ class HomeViewModel: ObservableObject {
                 self.books = snapshot?.documents.compactMap { document in
                     do {
                         let book = try document.data(as: Book.self)
-                        print("Debug: Book cover URL - \(book.coverURL ?? "nil")")
                         return book
                     } catch {
                         print("Debug: Error decoding book - \(error.localizedDescription)")
@@ -43,5 +42,28 @@ class HomeViewModel: ObservableObject {
     @MainActor
     func refreshBooks() async {
         fetchBooks()
+    }
+    
+    func addLoan(_ loan: Loan) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        // 1. Add the loan document under the user's loans collection
+        var loanData = try Firestore.Encoder().encode(loan)
+        loanData["lenderId"] = userId
+        
+        try await db.collection("users")
+            .document(userId)
+            .collection("loans")
+            .addDocument(data: loanData)
+        
+        // 2. Update book status in the user's books collection
+        try await db.collection("users")
+            .document(userId)
+            .collection("books")
+            .document(loan.bookId)
+            .updateData(["lendingStatus": Book.LendingStatus.lent.rawValue])
+        
+        // 3. Notify that the library has changed
+        NotificationCenter.default.post(name: .libraryDidChange, object: nil)
     }
 } 

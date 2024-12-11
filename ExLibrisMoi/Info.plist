@@ -8,5 +8,7 @@
 	<string>We need access to your camera to take profile pictures and easily scan your books into your library!</string>
 	<key>GOOGLE_BOOKS_API_KEY</key>
 	<string>$(GOOGLE_BOOKS_API_KEY)</string>
+	<key>NYT_API_KEY</key>
+	<string>$(NYT_API_KEY)</string>
 </dict>
 </plist>

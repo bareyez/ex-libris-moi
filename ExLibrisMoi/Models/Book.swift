@@ -1,7 +1,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct Book: Identifiable, Codable {
+struct Book: Identifiable, Codable, Hashable {
     @DocumentID var id: String? // Firestore document ID
     let isbn: String
     let title: String
@@ -17,6 +17,33 @@ struct Book: Identifiable, Codable {
     var lendingStatus: LendingStatus
     var userRating: Int
     let dateAdded: Date
+    
+    // Computed property for formatted published date
+    var formattedPublishedDate: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        if let date = dateFormatter.date(from: publishedDate) {
+            dateFormatter.dateFormat = "MMMM d, yyyy"
+            return dateFormatter.string(from: date)
+        } else if let date = dateFormatter.date(from: publishedDate + "-01") {
+            // Handle year-month format
+            dateFormatter.dateFormat = "MMMM yyyy"
+            return dateFormatter.string(from: date)
+        } else if let year = Int(publishedDate) {
+            // Handle year-only format
+            return String(year)
+        }
+        
+        return publishedDate
+    }
+    
+    // Computed property for formatted date added
+    var formattedDateAdded: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMMM d, yyyy"
+        return dateFormatter.string(from: dateAdded)
+    }
     
     enum LendingStatus: String, Codable, CaseIterable {
         case available
@@ -66,5 +93,16 @@ struct Book: Identifiable, Codable {
         self.lendingStatus = lendingStatus
         self.userRating = userRating
         self.dateAdded = dateAdded
+    }
+    
+    // Add this function to conform to Hashable
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(isbn)
+    }
+    
+    // Add this function to conform to Equatable (required by Hashable)
+    static func == (lhs: Book, rhs: Book) -> Bool {
+        lhs.id == rhs.id && lhs.isbn == rhs.isbn
     }
 } 

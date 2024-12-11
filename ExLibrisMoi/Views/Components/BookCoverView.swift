@@ -10,18 +10,13 @@ struct BookCoverView: View {
                 case .empty:
                     ProgressView()
                         .frame(maxWidth: .infinity)
-                        .aspectRatio(2/3, contentMode: .fit)
-                        .onAppear {
-                            print("Debug: Loading image from URL: \(coverURLString)")
-                        }
+                        .aspectRatio(2/3, contentMode: .fill)
                 case .success(let image):
                     image
                         .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .clipped()
-                        .onAppear {
-                            print("Debug: Successfully loaded image from URL: \(coverURLString)")
-                        }
                 case .failure(let error):
                     placeholderImage
                         .onAppear {
@@ -32,8 +27,9 @@ struct BookCoverView: View {
                     placeholderImage
                 }
             }
-            .frame(maxWidth: .infinity)
-            .aspectRatio(2/3, contentMode: .fit)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .aspectRatio(2/3, contentMode: .fill)
+            .clipped()
             .cornerRadius(8)
             .shadow(radius: 2)
         } else {
@@ -61,8 +57,8 @@ struct BookCoverView: View {
                         .lineLimit(3)
                 }
             )
-            .frame(maxWidth: .infinity)
-            .aspectRatio(2/3, contentMode: .fit)
+            .aspectRatio(2/3, contentMode: .fill)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .cornerRadius(8)
             .shadow(radius: 2)
     }

@@ -8,7 +8,7 @@ struct MainTabView: View {
                     Label("Home", systemImage: "house")
                 }
             
-            Text("Discover")
+            DiscoverView()
                 .tabItem {
                     Label("Discover", systemImage: "magnifyingglass")
                 }
@@ -18,7 +18,7 @@ struct MainTabView: View {
                     Label("Community", systemImage: "person.3")
                 }
             
-            Text("Lending")
+            LendingView()
                 .tabItem {
                     Label("Lending", systemImage: "arrow.left.arrow.right")
                 }

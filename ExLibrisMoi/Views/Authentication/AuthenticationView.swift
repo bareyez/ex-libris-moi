@@ -25,19 +25,19 @@ struct WelcomeView: View {
         VStack(spacing: 24) {
             Spacer()
             
-            Text("ex libris,\nmoi")
-                .font(.custom("Georgia", size: 32))
-                .multilineTextAlignment(.center)
+            Image("exlibrismoi_launch")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 200, height: 200)
                 .padding()
             
             Text("Your library, your legacy.")
-                .font(.custom("Georgia", size: 18))
+                .font(.title3)
             
             Spacer()
             
             NavigationLink(destination: LoginView()) {
                 Text("Log In")
-                .font(.custom("Georgia", size: 18))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color(.systemGray6))
@@ -46,7 +46,6 @@ struct WelcomeView: View {
             
             NavigationLink(destination: SignUpView()) {
                 Text("Sign Up")
-                    .font(.custom("Georgia", size: 18))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color(.systemGray))

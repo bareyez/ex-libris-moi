@@ -13,36 +13,36 @@ struct LoginView: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("Log in")
-                .font(.custom("Georgia", size: 32))
-            
-            if !errorMessage.isEmpty {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .font(.custom("Georgia", size: 14))
-                    .multilineTextAlignment(.center)
-            }
+                .font(.largeTitle)
             
             TextField("Email or Username", text: $identifier)
                 .textFieldStyle(.roundedBorder)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled(true)
-                .font(.custom("Georgia", size: 16))
                 .controlSize(.large)
             
             SecureField("Password", text: $password)
                 .textFieldStyle(.roundedBorder)
-                .font(.custom("Georgia", size: 16))
                 .controlSize(.large)
+            
             Button("Log in") {
-                login()
+                if identifier.isEmpty || password.isEmpty {
+                    errorMessage = "Please fill in all fields"
+                    showError = true
+                } else {
+                    login()
+                }
             }
-            .font(.custom("Georgia", size: 16))
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color(.systemGray))
             .foregroundColor(.white)
             .cornerRadius(10)
             .disabled(isLoading)
+            
+            if isLoading {
+                ProgressView()
+            }
             
             Button("Forgot password?") {
                 // Implement password reset
@@ -51,6 +51,11 @@ struct LoginView: View {
         }
         .padding()
         .navigationBarBackButtonHidden(false)
+        .alert("Unable to Log In", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
     }
     
     private func login() {
@@ -64,7 +69,7 @@ struct LoginView: View {
                     loginWithEmail(email)
                 } else {
                     isLoading = false
-                    errorMessage = "Username not found"
+                    errorMessage = "No account found with this username. Please check and try again."
                     showError = true
                 }
             }

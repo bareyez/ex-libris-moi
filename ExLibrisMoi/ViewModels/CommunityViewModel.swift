@@ -19,24 +19,30 @@ class CommunityViewModel: ObservableObject {
         }
         
         isLoading = true
+        let searchLowerCase = searchText.lowercased()
         
-        // Search for users where username contains the search text
         db.collection("users")
-            .whereField("username", isGreaterThanOrEqualTo: searchText.lowercased())
-            .whereField("username", isLessThanOrEqualTo: searchText.lowercased() + "\u{f8ff}")
+            .whereField("username", isGreaterThanOrEqualTo: searchLowerCase)
+            .whereField("username", isLessThanOrEqualTo: searchLowerCase + "\u{f8ff}")
+            .limit(to: 10)
             .getDocuments { [weak self] snapshot, error in
                 guard let self = self else { return }
                 
-                self.isLoading = false
-                
-                if let error = error {
-                    self.errorMessage = error.localizedDescription
-                    return
+                if let snapshot = snapshot {
+                    self.searchResults = snapshot.documents.compactMap { document in
+                        do {
+                            print("Debug: Processing document ID: \(document.documentID)")
+                            var user = try document.data(as: User.self)
+                            user.setId(document.documentID)
+                            print("Debug: Final user - ID: \(user.id ?? "nil"), Username: \(user.username)")
+                            return user
+                        } catch {
+                            print("Debug: Error decoding user document: \(error)")
+                            return nil
+                        }
+                    }
                 }
-                
-                self.searchResults = snapshot?.documents.compactMap { document in
-                    try? document.data(as: User.self)
-                } ?? []
+                self.isLoading = false
             }
     }
     
@@ -78,10 +84,22 @@ class CommunityViewModel: ObservableObject {
                 .getDocuments()
             
             friends = snapshot.documents.compactMap { document in
-                try? document.data(as: User.self)
+                do {
+                    print("Debug: Processing friend document ID: \(document.documentID)")
+                    var friend = try document.data(as: User.self)
+                    friend.setId(document.documentID)  // Set the document ID explicitly
+                    print("Debug: Decoded friend - ID: \(friend.id ?? "nil"), Username: \(friend.username)")
+                    return friend
+                } catch {
+                    print("Debug: Error decoding friend document: \(error)")
+                    return nil
+                }
             }
+            
+            print("Debug: Fetched \(friends.count) friends")
         } catch {
             errorMessage = "Failed to fetch friends: \(error.localizedDescription)"
+            print("Debug: Error fetching friends: \(error.localizedDescription)")
         }
     }
 } 

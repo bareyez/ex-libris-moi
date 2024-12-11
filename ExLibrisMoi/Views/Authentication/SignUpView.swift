@@ -12,59 +12,50 @@ struct SignUpView: View {
     @State private var errorMessage = ""
     @State private var showError = false
     @State private var isCheckingUsername = false
+    @State private var showUsernameError = false
+    @State private var isLoading = false
     
     var body: some View {
         VStack(spacing: 20) {
             Text("Create Account")
-                .font(.custom("Georgia", size: 32))
+                .font(.largeTitle)
             
-            TextField("Your first name", text: $firstName)
-                .textFieldStyle(.roundedBorder)
-                .font(.custom("Georgia", size: 16))
-                .controlSize(.large)
-            
-            TextField("Your last name", text: $lastName)
-                .textFieldStyle(.roundedBorder)
-                .font(.custom("Georgia", size: 16))
-                .controlSize(.large)
-            
-            TextField("Choose a username", text: $username)
-                .textFieldStyle(.roundedBorder)
-                .autocapitalization(.none)
-                .onChange(of: username) { newValue in
-                    checkUsernameAvailability()
-                }
-                .font(.custom("Georgia", size: 16))
-                .controlSize(.large)
+            Group {
+                TextField("Your first name", text: $firstName)
+                TextField("Your last name", text: $lastName)
+                TextField("Choose a username", text: $username)
+                    .autocapitalization(.none)
+                    .onChange(of: username) { newValue in
+                        checkUsernameAvailability()
+                    }
+                TextField("Your email address", text: $email)
+                    .textInputAutocapitalization(.never)
+                SecureField("Create a password", text: $password)
+            }
+            .textFieldStyle(.roundedBorder)
+            .controlSize(.large)
             
             if isCheckingUsername {
                 ProgressView()
             }
             
-            TextField("Your email address", text: $email)
-                .textFieldStyle(.roundedBorder)
-                .textInputAutocapitalization(.never)
-                .font(.custom("Georgia", size: 16))
-                .controlSize(.large)
-            
-            SecureField("Create a password", text: $password)
-                .textFieldStyle(.roundedBorder)
-                .font(.custom("Georgia", size: 16))
-                .controlSize(.large)
-            
             Text("Password must be at least 8 characters.")
                 .font(.caption)
                 .foregroundColor(.gray)
-                .font(.custom("Georgia", size: 12))
             
             Button("Create account") {
-                signUp()
+                validateAndSignUp()
             }
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color(.systemGray))
             .foregroundColor(.white)
             .cornerRadius(10)
+            .disabled(isLoading)
+            
+            if isLoading {
+                ProgressView()
+            }
             
             Text("By creating an account, you agree to our Terms of Service and Privacy Policy.")
                 .font(.caption)
@@ -72,12 +63,40 @@ struct SignUpView: View {
                 .foregroundColor(.gray)
         }
         .padding()
+        .navigationBarBackButtonHidden(false)
         .alert("Error", isPresented: $showError) {
-            Button("OK") { }
+            Button("OK", role: .cancel) { }
         } message: {
             Text(errorMessage)
         }
-        .navigationBarBackButtonHidden(false)
+        .alert("Username Not Available", isPresented: $showUsernameError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("This username is already taken. Please choose another one.")
+        }
+    }
+    
+    private func validateAndSignUp() {
+        if firstName.isEmpty || lastName.isEmpty || username.isEmpty || email.isEmpty || password.isEmpty {
+            errorMessage = "Please fill in all fields"
+            showError = true
+            return
+        }
+        
+        if password.count < 8 {
+            errorMessage = "Password must be at least 8 characters long"
+            showError = true
+            return
+        }
+        
+        if !email.contains("@") {
+            errorMessage = "Please enter a valid email address"
+            showError = true
+            return
+        }
+        
+        isLoading = true
+        signUp()
     }
     
     private func checkUsernameAvailability() {
@@ -89,8 +108,7 @@ struct SignUpView: View {
             .getDocument { document, error in
                 isCheckingUsername = false
                 if let document = document, document.exists {
-                    errorMessage = "Username is already taken"
-                    showError = true
+                    showUsernameError = true
                 }
             }
     }

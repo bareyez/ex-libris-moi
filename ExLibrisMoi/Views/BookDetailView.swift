@@ -90,7 +90,7 @@ struct BookDetailView: View {
                     Text("More details")
                         .font(.headline)
                     
-                    DetailRow(title: "Published Date", value: book.publishedDate)
+                    DetailRow(title: "Published Date", value: book.formattedPublishedDate)
                     if let publisher = book.publisher {
                         DetailRow(title: "Publisher", value: publisher)
                     }
@@ -100,8 +100,7 @@ struct BookDetailView: View {
                     if let genres = book.genre {
                         DetailRow(title: "Genre(s)", value: genres.joined(separator: ", "))
                     }
-                    DetailRow(title: "ISBN", value: book.isbn)
-                    DetailRow(title: "Date Added", value: formatDate(book.dateAdded))
+                    DetailRow(title: "Added to Library", value: book.formattedDateAdded)
                 }
                 .padding()
                 
@@ -179,7 +178,8 @@ struct BookHeaderView: View {
         VStack(spacing: 16) {
             // Book cover
             BookCoverView(book: book)
-                .frame(height: 240)
+                .frame(width: 160, height: 240)  // 2:3 aspect ratio, smaller width
+                .shadow(radius: 5)
             
             // Title and Author
             VStack(spacing: 8) {
@@ -194,6 +194,7 @@ struct BookHeaderView: View {
             }
             .padding(.horizontal)
         }
+        .frame(maxWidth: .infinity)  // Ensure the VStack takes full width
         .padding(.vertical)
     }
 }

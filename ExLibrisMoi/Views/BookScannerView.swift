@@ -5,6 +5,7 @@ struct BookScannerView: View {
     @StateObject private var viewModel = BookScannerViewModel()
     @State private var isPresentingScanner = false
     @State private var selectedTab = 0
+    @State private var scannerActive = false
     
     var body: some View {
         VStack {
@@ -26,27 +27,30 @@ struct BookScannerView: View {
             
             if selectedTab == 0 {
                 // Scanner View
-                Button(action: {
-                    isPresentingScanner = true
-                }) {
-                    VStack {
-                        Image(systemName: "barcode.viewfinder")
-                            .font(.largeTitle)
-                        Text("Tap to scan")
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(.systemGray6))
-                }
-                
-                Button(action: {
-                    // Manual entry
-                }) {
-                    Label("Enter manually", systemImage: "pencil")
-                        .padding()
+                VStack(spacing: 16) {
+                    Button(action: {
+                        scannerActive = true
+                        isPresentingScanner = true
+                    }) {
+                        VStack {
+                            Image(systemName: "barcode.viewfinder")
+                                .font(.largeTitle)
+                            Text("Tap to scan")
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color(.systemGray6))
-                        .cornerRadius(8)
+                    }
+                    
+                    Button(action: {
+                        // Manual entry
+                    }) {
+                        Label("Enter manually", systemImage: "pencil")
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                    }
+                    .padding(.horizontal)
                 }
-                .padding()
             } else {
                 // Scanned Books List
                 ScrollView {
@@ -71,9 +75,12 @@ struct BookScannerView: View {
                 .padding()
             }
         }
-        .sheet(isPresented: $isPresentingScanner) {
+        .sheet(isPresented: $isPresentingScanner, onDismiss: {
+            scannerActive = false
+        }) {
             CodeScannerView(
                 codeTypes: [.ean13, .ean8],
+                scanMode: scannerActive ? .continuous : .oncePerCode,
                 simulatedData: "9780141036144",
                 completion: handleScan
             )
@@ -99,6 +106,7 @@ struct BookScannerView: View {
     }
     
     private func handleScan(result: Result<ScanResult, ScanError>) {
+        scannerActive = false
         isPresentingScanner = false
         switch result {
         case .success(let result):
@@ -127,8 +135,9 @@ struct ScannedBookRow: View {
                     .font(.headline)
                 Text(book.author)
                     .font(.subheadline)
-                Text(book.publishedDate)
+                Text(book.formattedPublishedDate)
                     .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
             Spacer()
@@ -140,4 +149,4 @@ struct ScannedBookRow: View {
             }
         }
     }
-} 
+}

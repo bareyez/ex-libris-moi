@@ -2,147 +2,130 @@ import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
+import PhotosUI
 
 struct ProfileView: View {
+    @StateObject private var viewModel = ProfileViewModel()
+    @State private var selectedItem: PhotosPickerItem?
+    @State private var selectedImage: UIImage?
     @State private var firstName = ""
     @State private var username = ""
     @State private var memberSince = Date()
-    @State private var profileImage: UIImage?
-    @State private var showImagePicker = false
-    @State private var showActionSheet = false
-    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
-    @State private var isUploading = false
-    @State private var showError = false
-    @State private var errorMessage = ""
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                Button(action: {
-                    showActionSheet = true
-                }) {
-                    if let image = profileImage {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 120, height: 120)
-                            .clipShape(Circle())
-                    } else {
-                        Circle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(width: 120, height: 120)
-                            .overlay(
-                                Image(systemName: "person.fill")
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Profile Image Section
+                    VStack {
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .frame(width: 120, height: 120)
+                        } else {
+                            if let imageURL = viewModel.profileImageURL {
+                                AsyncImage(url: URL(string: imageURL)) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 120, height: 120)
+                                            .clipShape(Circle())
+                                            .shadow(radius: 3)
+                                    case .failure(_):
+                                        Image(systemName: "person.circle.fill")
+                                            .resizable()
+                                            .frame(width: 120, height: 120)
+                                            .foregroundColor(.gray)
+                                    case .empty:
+                                        ProgressView()
+                                    @unknown default:
+                                        Image(systemName: "person.circle.fill")
+                                            .resizable()
+                                            .frame(width: 120, height: 120)
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                            } else {
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .frame(width: 120, height: 120)
                                     .foregroundColor(.gray)
-                                    .font(.system(size: 50))
-                            )
+                            }
+                        }
+                        
+                        // Photo Picker Button
+                        PhotosPicker(selection: $selectedItem,
+                                   matching: .images,
+                                   photoLibrary: .shared()) {
+                            Text("Change Profile Picture")
+                                .font(.headline)
+                        }
+                        .padding(.top, 8)
                     }
-                }
-                
-                VStack(spacing: 5) {
-                    Text(firstName)
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                    .padding()
                     
-                    Text("@\(username)")
-                        .foregroundColor(.gray)
+                    if let errorMessage = viewModel.errorMessage {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .padding()
+                    }
                     
-                    Text("member since \(memberSince.formatted(.dateTime.year()))")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                    // Profile Information Section
+                    VStack(spacing: 5) {
+                        Text(firstName)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("@\(username)")
+                            .foregroundColor(.gray)
+                        
+                        Text("member since \(memberSince.formatted(.dateTime.year()))")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    Spacer()
+                    
+                    Button(action: signOut) {
+                        Text("log out")
+                            .frame(width: 100)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(25)
+                    }
+                    .padding(.bottom)
+                    
                 }
-
-                Spacer()
-                
-                Button(action: signOut) {
-                    Text("log out")
-                        .frame(width: 100)
-                        .padding()
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(25)
-                }
-                .padding(.bottom)
             }
             .navigationTitle("Profile")
         }
-        .onAppear(perform: loadUserData)
-        .sheet(isPresented: $showImagePicker) {
-            ImagePicker(image: $profileImage, sourceType: sourceType)
-        }
-        .actionSheet(isPresented: $showActionSheet) {
-            ActionSheet(
-                title: Text("Select Photo"),
-                buttons: [
-                    .default(Text("Photo Library")) {
-                        sourceType = .photoLibrary
-                        showImagePicker = true
-                    },
-                    .default(Text("Camera")) {
-                        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                            sourceType = .camera
-                            showImagePicker = true
-                        } else {
-                            errorMessage = "Camera is not available"
-                            showError = true
-                        }
-                    },
-                    .cancel()
-                ]
-            )
-        }
-        .onChange(of: profileImage) { newImage in
-            if let image = newImage, isUploading == false {
-                uploadProfileImage(image)
-            }
-        }
-        .alert(isPresented: $showError) {
-            Alert(title: Text("Upload Error"),
-                  message: Text(errorMessage),
-                  dismissButton: .default(Text("OK")))
-        }
-    }
-    
-    private func loadUserData() {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        
-        // Load profile image without triggering upload
-        let storageRef = Storage.storage().reference().child("profile_images/\(userId).jpg")
-        storageRef.getData(maxSize: 4 * 1024 * 1024) { data, error in
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    // Set profileImage directly without triggering upload
-                    withAnimation {
-                        self.profileImage = image
-                    }
+        .onChange(of: selectedItem) { newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    selectedImage = image
+                    await viewModel.uploadProfileImage(image)
                 }
             }
         }
+        .task {
+            await viewModel.fetchCurrentUserProfile()
+            await loadUserData()
+        }
+    }
+    
+    private func loadUserData() async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
         
         Firestore.firestore().collection("users").document(userId).getDocument { document, error in
             if let document = document, document.exists {
-                firstName = document.data()?["firstName"] as? String ?? ""
-                username = document.data()?["username"] as? String ?? ""
-                if let timestamp = document.data()?["memberSince"] as? TimeInterval {
-                    memberSince = Date(timeIntervalSince1970: timestamp)
+                firstName = document.get("firstName") as? String ?? ""
+                username = document.get("username") as? String ?? ""
+                if let timestamp = document.get("memberSince") as? Timestamp {
+                    memberSince = timestamp.dateValue()
                 }
-            }
-        }
-    }
-    
-    private func uploadProfileImage(_ image: UIImage) {
-        guard let userId = Auth.auth().currentUser?.uid,
-              let imageData = image.jpegData(compressionQuality: 0.5) else { return }
-        
-        isUploading = true
-        let storageRef = Storage.storage().reference().child("profile_images/\(userId).jpg")
-        
-        storageRef.putData(imageData, metadata: nil) { metadata, error in
-            isUploading = false
-            if let error = error {
-                errorMessage = error.localizedDescription
-                showError = true
-                print("Error uploading image: \(error)")
             }
         }
     }
@@ -150,4 +133,4 @@ struct ProfileView: View {
     private func signOut() {
         try? Auth.auth().signOut()
     }
-} 
+}
