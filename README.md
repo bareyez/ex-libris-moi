@@ -9,7 +9,9 @@ Ex Libris Moi is a personal library management system that helps users catalog t
 This section highlights the progress made in developing the app. Features are marked as complete or in progress.
 
 - 12/10/2024:
-	- Demo video of completed app and brief run through of code. 
+	- GIF runthrough of final app
+
+<img src="/design_gifs/dec10update.gif" width=300 height=auto />	
 
 [![YouTube Video for Demo](https://img.youtube.com/vi/e-lN1MQIWqg/0.jpg)](https://www.youtube.com/watch?v=e-lN1MQIWqg)
 
@@ -38,12 +40,12 @@ For Ex Libris Moi, I identified the following required features which a user nee
 
 - [X] User is able to add, edit, and delete books or media from a personal library
     - [X] *User can scan ISBN/UPC barcode to add media via external API*
-    - [ ] User can search and filter by title, author, genre, or year
-- [ ] User is able to explore new books/media through an external API
+    - [X] User can search and filter by title, author, genre, or year
+- [X] User is able to explore new books/media through an external API
     - [ ] User is able to add books from discovery to a wishlist
-- [ ] User can check-in/check-out books to track lending and borrowing
-    - [ ] Record borrower details (name, profile, contact)
-    - [ ] Mark items as returned
+- [X] User can check-in/check-out books to track lending and borrowing
+    - [X] Record borrower details (name, profile, contact)
+    - [X] Mark items as returned
 - [X] User is able to manage user account and log off
 - [X] Tab-based navigation with Home, Discover, Community (optional), Lending, and Profile
 
@@ -51,7 +53,7 @@ For Ex Libris Moi, I identified the following required features which a user nee
 - [ ] User can share collections or book recommendations
 - [ ] View borrowing stats or ratings of shared titles
 - [ ] User can send reminders for overdue or upcoming returns
-- [ ] Wishlist is able to lead to an online store to buy book
+- [X] Wishlist is able to lead to an online store to buy book
 
 ## 🤳 Screens
 
