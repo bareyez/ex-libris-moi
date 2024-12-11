@@ -8,6 +8,12 @@ Ex Libris Moi is a personal library management system that helps users catalog t
 
 This section highlights the progress made in developing the app. Features are marked as complete or in progress.
 
+- 12/10/2024:
+	- Demo video of completed app and brief run through of code. 
+
+[![YouTube Video for Demo](https://img.youtube.com/vi/e-lN1MQIWqg/0.jpg)](https://www.youtube.com/watch?v=e-lN1MQIWqg)
+
+
 - 12/05/2024:
 	- Added ability for users to scan ISBN/UPC barcodes to add media.
 	- Tab-based navigation between Home, Discover, Lending, and Profile screens implemented.
