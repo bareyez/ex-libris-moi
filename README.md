@@ -1,108 +1,108 @@
-# ex libris moi 📚: your personal library
+# Ex Libris Moi
 
-### 📲 App Description
+## Description
 
-Ex Libris Moi is a personal library management system that helps users catalog their books and media, track lending activities, and explore new titles. The app provides an elegant and minimalist user interface for organizing collections and interacting with friends or the community.
+Ex Libris Moi is a comprehensive library management application designed to help users catalog and manage their personal book collections efficiently. Built using Swift and integrated with Firebase, it offers real-time data synchronization and robust backend support.
 
-## ↘️ Progress Updates
+## Features
 
-This section highlights the progress made in developing the app. Features are marked as complete or in progress.
+- **Catalog Management:** Add, edit, and delete books from your personal library.
+- **Search Functionality:** Quickly search and filter through your collection.
+- **Borrowing Tracker:** Keep track of borrowed books and their return dates.
+- **Firebase Integration:** Real-time data sync and user authentication.
 
-- 12/10/2024:
-	- GIF runthrough of final app
+## Installation
 
-<img src="/design_gifs/dec10update.gif" width=300 height=auto />	
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/bareyez/ex-libris-moi.git
+   ```
+2. **Navigate to the Project Directory:**
+   ```bash
+   cd ex-libris-moi
+   ```
+3. **Install Dependencies:**
+   Ensure you have CocoaPods installed. If not, install it using:
+   ```bash
+   sudo gem install cocoapods
+   ```
+   Then, install the project dependencies:
+   ```bash
+   pod install
+   ```
+4. **Open the Project:**
+   Open the `.xcworkspace` file in Xcode:
+   ```bash
+   open "ExLibrisMoi.xcworkspace"
+   ```
+5. **Firebase Configuration:**
+   - **Obtain the `GoogleService-Info.plist` File:**
+     - Log in to the [Firebase Console](https://console.firebase.google.com/).
+     - Navigate to your project or create a new one.
+     - Register your iOS app with the bundle identifier used in this project.
+     - Download the `GoogleService-Info.plist` file.
+   - **Add the Configuration File to the Project:**
+     - Drag and drop the `GoogleService-Info.plist` file into the root of your Xcode project.
+     - Ensure it's added to all targets when prompted.
 
-[![YouTube Video for Demo](https://img.youtube.com/vi/e-lN1MQIWqg/0.jpg)](https://www.youtube.com/watch?v=e-lN1MQIWqg)
+## Usage
 
+1. **Build and Run:**
+   - In Xcode, select your target device or simulator.
+   - Press `Cmd + R` or click on the run button to build and launch the app.
+2. **Explore Features:**
+   - Add new books to your collection.
+   - Use the search bar to find specific titles.
+   - Track borrowed books and set return reminders.
 
-- 12/05/2024:
-	- Added ability for users to scan ISBN/UPC barcodes to add media.
-	- Tab-based navigation between Home, Discover, Lending, and Profile screens implemented.
+## Project Structure
 
-<img src="/design_gifs/dec5update.gif" width=300 height=auto />	
+The project follows a modular structure based on MVC principles:
 
-- 11/30/2024:
-	- Created and integrated user authentication system.
-	- Designed wireframes for Home and Lending screens.
-- 11/20/2024:
-	- Completed initial project setup (repo creation, boilerplate code).
+```
+ex-libris-moi/
+├── ExLibrisMoi/
+│   ├── Models/
+│   │   └── Book.swift
+│   ├── Views/
+│   │   ├── BookCell.swift
+│   │   ├── BookDetailView.swift
+│   │   ├── LendingView.swift
+│   │   ├── LoginView.swift
+│   │   ├── SignUpView.swift
+│   │   └── HomeView.swift
+│   ├── Root/
+│   │   └── ContentView.swift
+│   ├── Resources/
+│   │   ├── Assets.xcassets
+│   │   └── Base.lproj/
+│   └── AppDelegate.swift
+│
+├── Pods/
+├── Podfile
+├── Podfile.lock
+├── ExLibrisMoi.xcodeproj/
+│
+├── README.md
+├── .gitignore
+├── LICENSE
+│
+├── docs/
+│   ├── brainstorming1_bryanreyes.md
+│   └── brainstorming2_bryanReyes.md
+│
+├── design_gifs/
+│   └── demo1.gif
+│
+└── GoogleService-Info.plist
+```
 
-# Product Spec Design
+## Contributing
 
-## 🧾 User Stories
+Contributions are welcome! Please fork the repository and submit a pull request with your enhancements.
 
-The following are features within the app that the user is able to do. They are separated by "must-have" (required) and "nice-to-have" (optional).
+## License
 
-#### Required Stories
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-For Ex Libris Moi, I identified the following required features which a user needs to be able to perform the app to work:
-
-- [X] User is able to add, edit, and delete books or media from a personal library
-    - [X] *User can scan ISBN/UPC barcode to add media via external API*
-    - [X] User can search and filter by title, author, genre, or year
-- [X] User is able to explore new books/media through an external API
-    - [ ] User is able to add books from discovery to a wishlist
-- [X] User can check-in/check-out books to track lending and borrowing
-    - [X] Record borrower details (name, profile, contact)
-    - [X] Mark items as returned
-- [X] User is able to manage user account and log off
-- [X] Tab-based navigation with Home, Discover, Community (optional), Lending, and Profile
-
-#### Optional Stories
-- [ ] User can share collections or book recommendations
-- [ ] View borrowing stats or ratings of shared titles
-- [ ] User can send reminders for overdue or upcoming returns
-- [X] Wishlist is able to lead to an online store to buy book
-
-## 🤳 Screens
-
-The following are the screens that the user will encounter while working in the app. Like the features, they are separated by required and optional.
-
-### Required Screens
-
-- Home Screen
-    - Displays the user's library collection
-    - Includes search, filter, and sort functionalities
-    - Allows user to scan new books into their collection
-- Discover Screen
-    - Shows feed of books/media from external sources
-    - Allows users to add new items to a wishlist 
-- Lending Screen
-    - Tracks books lent out and borrowed
-    - Includes status labels like "Due soon" and "Borrowed out"
-    - Add new loans and mark items as returned
-- Profile Screen
-    - User account details and app settings
-    - Options to log out
- 
-## Optional Screens
-
-- Community Screen
-    - A social feed for recommendations and shared collections
- 
-## 🔄️ Navigation Flow
-
-### Tab Navigation (Tab to Screen)
-
-- Home/overall personal library
-- Discover new titles
-- Lending
-- Profile
-
-### Flow Navigation with Interactive Wireframes
-
-- Login/sign up screen => Home
-
-<img src="/design_gifs/logintohome.gif" width=300 height=auto />
-
-- Home => Add new book/media
-
-<img src="/design_gifs/hometoaddbook.gif" width=300 height=auto />
-
-- Discover titles => View wishlist
-- (For future version) Community feed (Find friends) => Create post
-- Lending/manage loans => Add new loan
-- Profile => Login/sign up screen (if user logs out)
-
-<img src="/design_gifs/otherfeatures.gif" width=300 height=auto />
+> 💡 For more insights on structuring Swift projects, you might find this helpful: [The Best Way to Structure Your iOS Project](https://levelup.gitconnected.com/the-best-way-to-struct-your-ios-project-a2daee7dcb45)
